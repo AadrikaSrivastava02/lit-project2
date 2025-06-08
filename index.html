@@ -27,13 +27,13 @@
       shape="pill"
       disable="false"
     ></my-button> -->
-    <segmented-control1 class="segment1" size="small"></segmented-control1>
-    <segmented-control1 class="segment3"></segmented-control1>
-     <segmented-control1 class="segment2"></segmented-control1>
+    <segmented-control1 class="segment1" size="small" ></segmented-control1>
+    <segmented-control1 class="segment3" disable></segmented-control1>
+     <segmented-control1 class="segment2" hover-popup></segmented-control1>
   </body>
   <script>
   var segment1=[
-    { label: 'Hotels', value: 'completed' },
+    { label: 'Hotels', value: 'completed', disabled: true},
     { label: 'Vacation Homes', value: 'incomplete' }]
     document.querySelector('.segment1').setAttribute('segments', JSON.stringify(segment1))
     document.querySelector('.segment1').addEventListener('segment-change',(event)=>{console.log(event)})
