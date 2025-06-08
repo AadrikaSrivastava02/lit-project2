@@ -77,9 +77,9 @@ export class SegmentedControl extends LitElement {
   margin-top: 2px;
   text-align:left;
 }
-.segment:hover{
+/* .segment:hover{
     background-color: #cce0ff;
-}
+} */
 .hover-info{
     margin-top: 10px;
     font-size: 14px;
