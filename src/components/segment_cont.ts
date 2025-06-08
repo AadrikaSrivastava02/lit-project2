@@ -5,12 +5,14 @@ interface Segment {
     label: string;
     value: string;
     sublabel?: string;
+    disabled?: boolean;
+    
 }
 
 @customElement('segmented-control1')
 export class SegmentedControl extends LitElement {
     @property({ type: String }) name = 'segmented-control';
-
+    
     @property({
         attribute: 'segments',
         type: Array, converter(value) {
@@ -22,25 +24,30 @@ export class SegmentedControl extends LitElement {
             }
         }
     }) segments: Segment[] = [];
-
+    // @property({type:Boolean, reflect:true}) disabled=false;
     @property({ type: Number }) defaultIndex = 0;
     @property({ type: String }) size = '';
+    @property({ type: Boolean }) disable=false;
     
+    @property({type:Boolean}) hover=false;
+    @property({ type: Boolean, reflect: true }) hoverPopup = false;
+    @state() private hoverLabel: string | null = null;
+    @state() private hoverIndex: number | null = null;
+ 
     @state() private activeIndex = 0;
+    // @state() private hoverLabel: string | null =' ';
 
     static styles = css`
-
-    :host{--segment_padding: 6px 15px}
-    :host([size='small']) .segment{ padding: 2px; font-size:12px;}
+    :host{--segment_padding: 6px }
+    :host([size='small']) .segment{ padding: 5px; font-size:12px;}
+    :host([disable]) .segment{background-color: #ccc; color: #777;
+     cursor: not-allowed; pointer-events: none;}
+    :host([hover]) .segment{background-color: transparent;}
     .container {
-      display:inline-flex;       
-      
+      display:inline-flex;  
       border: 1px groove #a3a2a2;
       border-radius: 5px ;
-      /* overflow: hidden; */
-      /* margin-top:20px; */
       
-
     }
     .segment {
   display: inline-flex;   
@@ -50,11 +57,9 @@ export class SegmentedControl extends LitElement {
   /* user-select: none; */
   background-color: #eee;
   transition: background-color 0.3s;
-  white-space: nowrap;  
+  /* white-space: nowrap;   */
    font-family: 'Arial', sans-serif;
-  flex-direction: column; 
- 
-       
+  flex-direction: column;        
 }
 
     .segment.active {
@@ -72,13 +77,27 @@ export class SegmentedControl extends LitElement {
   margin-top: 2px;
   text-align:left;
 }
-    /* .segment:hover{
-      background-color: #b9bcbe;
-      
-    } */
+.segment:hover{
+    background-color: #cce0ff;
+}
+.hover-info{
+    margin-top: 10px;
+    font-size: 14px;
+    color: #444;
+}
+.tooltip {
+  position: absolute;
+  background: #222;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  transform: translateY(-110%);
+}
 
-    
-  `;
+`;
 
     connectedCallback() {
         super.connectedCallback();
@@ -94,24 +113,42 @@ export class SegmentedControl extends LitElement {
             composed: true,
         }));
     }
+    private mouseEnter(label: string, index: number) {
+  this.hoverLabel = label;
+  this.hoverIndex = index;
+}
 
-    render() {
-        return html`
+private mouseLeave = () => {
+  this.hoverLabel = null;
+  this.hoverIndex = null;
+}
+
+   render() {
+  return html`
     <div class="container">
       ${this.segments.map(
-            (segment, i) => html`
+        (segment, i) => html`
           <div
             class="segment ${i === this.activeIndex ? 'active' : ''}"
-            @click=${() => this.onSegmentClick(i)}
+            @click=${() => !segment.disabled && this.onSegmentClick(i)}
+            style=${segment.disabled
+              ? 'pointer-events: none; color: #aaa; background:#f0f0f0;'
+              : ''}
+            @mouseenter=${() => this.mouseEnter(segment.label, i)}
+            @mouseleave=${this.mouseLeave}
           >
-            ${segment.label}<span>
-                ${segment?.sublabel}
-            </span>
-        </div>
-            `
-        )}
+            ${segment.label}
+            <span class="sublabel">${segment?.sublabel ?? ''}</span>
+
+            ${this.hoverPopup && this.hoverIndex === i && this.activeIndex === i
+              ? html`<div class="tooltip">You are hovering on "${segment.label}"</div>`
+              : null}
+          </div>
+        `
+      )}
     </div>
   `;
-    }
+}
+
 
 }
